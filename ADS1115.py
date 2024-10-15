@@ -117,18 +117,18 @@ class Device:
             bus = smbus.SMBus(i2c_channel)
 
             bus.write_quick(address)
-            print(f"I2C device found at address 0x{address:X}.")
+            # print(f"I2C device found at address 0x{address:X}.")
             return True
 
         except OSError:
-            print(f"I2C device not found at address 0x{address:X}.")
+            # print(f"I2C device not found at address 0x{address:X}.")
             return False
     
     def read(self) -> list:
         try:
             if self._check_if_device_exists(self.i2c_channel, self.address):
                 return self._read_logical_port(address, resolution, i2c_channel)
-            raise AdsNotFound("Could not find i2c device")
+            raise AdsNotFound(f"Could not find i2c device on channel 0x{i2c_channel:X} and address 0x{address:X}")
         except Exception as e:
             raise AdsReadException(e)
 
@@ -147,14 +147,14 @@ def search_i2c_memory(i2c_channel: int = 0) -> Optional[list]:
                 pass
 
         if available_devices:
-            print(f"Devices found at addresses: {available_devices}")
+            # print(f"Devices found at addresses: {available_devices}")
             return available_devices
         else:
-            print("No I2C devices found.")
+            # print("No I2C devices found.")
             return None
     except Exception as error:
-        print(f'Error searching for I2C devices: {error}')
-        return None
+        # print(f'Error searching for I2C devices: {error}')
+        raise AdsReadException(f'Error searching for I2C devices: {error}')
 
 
 if __name__ == "__main__":
@@ -169,10 +169,10 @@ if __name__ == "__main__":
         ads_sensor = Device(address, resolution, i2c_channel)
         try:
             voltages = ads_sensor.read()
-        except AdsReadException:
-            print("Error reading i2c device")
-        except AdsNotFound:
-            print("Device not found")
+        except AdsReadException as e:
+            print(f"Error reading i2c device: {e}")
+        except AdsNotFound as e:
+            print(f"Device not found: {e}")
         print(f"Channel readings: {voltages}")
 
     except Exception as e:
